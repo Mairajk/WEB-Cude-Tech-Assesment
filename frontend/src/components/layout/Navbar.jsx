@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import Button from "../common/Button";
 
 /**
  * Navbar Component
- * Responsive top navigation bar
- * Shows different links based on auth state and user role
+ * Uses NavLink instead of Link for active route highlighting
+ * NavLink automatically applies active styles when route matches
  */
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -15,9 +15,27 @@ const Navbar = () => {
   const [loggingOut, setLoggingOut] = useState(false);
 
   /**
-   * Handle logout with loading state
-   * Redirects to home after successful logout
+   * Reusable NavLink class generator
+   * Returns active styles when route matches
+   * Returns default styles otherwise
+   * @param {boolean} isActive - Injected by NavLink automatically
    */
+  const navLinkClass = ({ isActive }) =>
+    `text-sm font-medium transition-colors pb-0.5 ${
+      isActive
+        ? "text-blue-600 border-b-2 border-blue-600"
+        : "text-gray-600 hover:text-blue-600 border-b-2 border-transparent"
+    }`;
+
+  /**
+   * Mobile NavLink class generator
+   * Different styling for mobile menu items
+   */
+  const mobileNavLinkClass = ({ isActive }) =>
+    `block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+      isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
+    }`;
+
   const handleLogout = async () => {
     setLoggingOut(true);
     await logout();
@@ -39,37 +57,18 @@ const Navbar = () => {
 
           {/** Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
-            <Link
-              to="/"
-              className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
-            >
+            <NavLink to="/" end className={navLinkClass}>
               Home
-            </Link>
-            <Link
-              to="/blog"
-              className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
-            >
+            </NavLink>
+            <NavLink to="/blog" className={navLinkClass}>
               Blog
-            </Link>
+            </NavLink>
 
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
-                >
+                <NavLink to="/dashboard" end className={navLinkClass}>
                   Dashboard
-                </Link>
-
-                {/** Show admin link only for admin users */}
-                {user?.role === "admin" && (
-                  <Link
-                    to="/dashboard/stats"
-                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    Stats
-                  </Link>
-                )}
+                </NavLink>
 
                 <div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-200">
                   {/** User avatar and name */}
@@ -126,31 +125,34 @@ const Navbar = () => {
 
         {/** Mobile Menu */}
         {menuOpen && (
-          <div className="md:hidden border-t border-gray-100 py-3 space-y-2">
-            <Link
+          <div className="md:hidden border-t border-gray-100 py-3 space-y-1">
+            <NavLink
               to="/"
+              end
               onClick={() => setMenuOpen(false)}
-              className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
+              className={mobileNavLinkClass}
             >
               Home
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               to="/blog"
               onClick={() => setMenuOpen(false)}
-              className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
+              className={mobileNavLinkClass}
             >
               Blog
-            </Link>
+            </NavLink>
 
             {isAuthenticated ? (
               <>
-                <Link
+                <NavLink
                   to="/dashboard"
+                  end
                   onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
+                  className={mobileNavLinkClass}
                 >
                   Dashboard
-                </Link>
+                </NavLink>
+
                 <div className="px-3 pt-2 border-t border-gray-100">
                   <Button
                     variant="danger"

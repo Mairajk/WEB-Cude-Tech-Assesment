@@ -22,11 +22,15 @@ const routes = require("./routes/index");
 
   const app = express();
 
-  console.log(
-    `
-    alllowed FRONT END URL >>>>>>>>>>>>>>>>>>....................`,
+  /**
+   * Whitelist of allowed origins
+   * Filter removes any undefined values
+   * in case env variables are not set
+   */
+  const allowedOrigins = [
+    "http://localhost:5173",
     process.env.FRONTEND_URL,
-  );
+  ].filter(Boolean); /** Removes undefined/null/empty values */
 
   /**
    * Core middleware
@@ -36,10 +40,24 @@ const routes = require("./routes/index");
    */
   app.use(
     cors({
-      origin: "*", // ["http://localhost:5173", process.env.FRONTEND_URL],
+      origin: (origin, callback) => {
+        /**
+         * Allow requests with no origin
+         * This covers server-to-server calls, Postman, mobile apps
+         * where origin header is not sent
+         */
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS blocked: ${origin} is not allowed`));
+        }
+      },
       credentials: true,
     }),
   );
+
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
