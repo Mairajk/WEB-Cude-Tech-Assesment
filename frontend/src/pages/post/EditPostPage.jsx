@@ -46,7 +46,7 @@ const EditPostPage = () => {
   const handleSubmit = async (postData) => {
     const result = await updatePost(id, postData);
     if (result.success) {
-      navigate("/dashboard/my-posts");
+      navigate("/dashboard/posts");
     }
   };
 
@@ -68,7 +68,7 @@ const EditPostPage = () => {
           <Button
             variant="secondary"
             className="mt-4"
-            onClick={() => navigate("/dashboard/my-posts")}
+            onClick={() => navigate("/dashboard/posts")}
           >
             ← Back to My Posts
           </Button>
@@ -82,10 +82,7 @@ const EditPostPage = () => {
       <div className="max-w-3xl">
         {/** Page Header with back button */}
         <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/dashboard/my-posts")}
-          >
+          <Button variant="ghost" onClick={() => navigate("/dashboard/posts")}>
             ← Back
           </Button>
           <div>

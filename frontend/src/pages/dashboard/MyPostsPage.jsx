@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import usePosts from "../../hooks/usePosts";
+import useAuth from "../../hooks/useAuth";
 import PostList from "../../components/post/PostList";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import Button from "../../components/common/Button";
 
 /**
  * MyPostsPage
- * Dashboard page showing authenticated user's posts
- * Supports status filtering and pagination
- * Provides edit, delete and status toggle actions
+ * Admin sees ALL posts from every author
+ * Author sees only their own posts
+ * Removed useCallback — React Compiler handles memoization
  */
 const MyPostsPage = () => {
   const {
@@ -21,52 +22,62 @@ const MyPostsPage = () => {
     updatePostStatus,
   } = usePosts();
 
+  const { isAdmin } = useAuth();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("");
   const [deletingId, setDeletingId] = useState(null);
 
   /**
+   * Current filter params object
+   * Defined once here and reused across all handlers
+   * Avoids repeating the same object in multiple places
+   */
+  const currentParams = {
+    page,
+    limit: 10,
+    status: statusFilter || undefined,
+  };
+
+  /**
    * Fetch posts whenever page or status filter changes
+   * currentParams is inlined so React can track dependencies
    */
   useEffect(() => {
-    fetchMyPosts({
-      page,
-      limit: 10,
-      status: statusFilter || undefined,
-    });
+    fetchMyPosts(currentParams);
   }, [page, statusFilter]);
 
   /**
    * Handle post deletion with confirmation
-   * @param {string} id - Post ID to delete
+   * Refetches list after deletion to sync pagination
    */
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     setDeletingId(id);
-    await deletePost(id);
+    const result = await deletePost(id);
+    if (result.success) fetchMyPosts(currentParams);
     setDeletingId(null);
   };
 
   /**
-   * Handle post status toggle (draft/published)
-   * @param {string} id - Post ID
-   * @param {string} status - New status
+   * Handle status toggle
+   * Passes current params so filtered view stays accurate
    */
   const handleStatusChange = async (id, status) => {
-    await updatePostStatus(id, status, {
-      page,
-      limit: 10,
-      status: statusFilter || undefined,
-    });
+    await updatePostStatus(id, status, currentParams);
   };
 
   return (
     <DashboardLayout>
-      {/** Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">My Posts</h1>
-          <p className="text-gray-500 mt-1">Manage all your blog posts</p>
+          <h1 className="text-3xl font-bold text-gray-800">
+            {isAdmin() ? "All Posts" : "My Posts"}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {isAdmin()
+              ? "Manage all posts from every author"
+              : "Manage your own blog posts"}
+          </p>
         </div>
         <Link to="/dashboard/create-post">
           <Button variant="primary" size="md">
@@ -99,7 +110,6 @@ const MyPostsPage = () => {
         ))}
       </div>
 
-      {/** Posts List with actions */}
       <PostList
         posts={myPosts}
         loading={loading}
@@ -108,7 +118,11 @@ const MyPostsPage = () => {
         showActions={true}
         onDelete={handleDelete}
         onStatusChange={handleStatusChange}
-        emptyMessage="You haven't created any posts yet."
+        emptyMessage={
+          isAdmin()
+            ? "No posts found in the system."
+            : "You haven't created any posts yet."
+        }
       />
     </DashboardLayout>
   );

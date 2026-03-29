@@ -85,7 +85,7 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/dashboard/my-posts"
+          path="/dashboard/posts"
           element={
             <ErrorBoundary>
               <ProtectedRoute>

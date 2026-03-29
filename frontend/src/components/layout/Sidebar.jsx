@@ -14,7 +14,11 @@ const Sidebar = () => {
    */
   const links = [
     { to: "/dashboard", label: "Overview", icon: "📊", end: true },
-    { to: "/dashboard/my-posts", label: "My Posts", icon: "📝" },
+    {
+      to: "/dashboard/posts",
+      label: user?.role === "admin" ? "All Posts" : "My Posts",
+      icon: "📝",
+    },
     { to: "/dashboard/create-post", label: "New Post", icon: "✏️" },
   ];
 

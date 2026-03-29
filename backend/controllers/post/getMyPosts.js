@@ -2,8 +2,10 @@ const Post = require("../../models/Post");
 
 /**
  * @route   GET /api/posts/my
- * @desc    Get all posts by the authenticated author (draft + published)
- * @access  Private (author, admin)
+ * @desc    Get posts based on role
+ *          Admin sees ALL posts from every author
+ *          Author sees only their own posts
+ * @access  Private (admin, author)
  */
 const getMyPosts = async (req, res, next) => {
   try {
@@ -16,14 +18,18 @@ const getMyPosts = async (req, res, next) => {
     } = req.query;
 
     /**
-     * Filter by authenticated user's ID
-     * Admins see all their posts, authors see only their own
+     * Admins see all posts from all authors
+     * Authors only see their own posts
+     * This is the core role-based filter
      */
-    const filter = { author: req.user.id };
+    const filter =
+      req.user.role === "admin"
+        ? {} /** No filter for admin — sees everything */
+        : { author: req.user.id }; /** Authors see only their own */
 
     /**
      * Optionally filter by status
-     * If not provided, returns both draft and published
+     * Works for both admin and author
      */
     if (status && ["draft", "published"].includes(status)) {
       filter.status = status;

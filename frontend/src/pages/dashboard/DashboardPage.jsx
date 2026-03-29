@@ -147,7 +147,7 @@ const DashboardPage = () => {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-700">Recent Posts</h2>
-          <Link to="/dashboard/my-posts">
+          <Link to="/dashboard/posts">
             <Button variant="ghost" size="sm">
               View All →
             </Button>

@@ -16,7 +16,7 @@ const CreatePostPage = () => {
   const handleSubmit = async (postData) => {
     const result = await createPost(postData);
     if (result.success) {
-      navigate("/dashboard/my-posts");
+      navigate("/dashboard/posts");
     }
   };
 
@@ -25,10 +25,7 @@ const CreatePostPage = () => {
       <div className="max-w-3xl">
         {/** Page Header with back button */}
         <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/dashboard/my-posts")}
-          >
+          <Button variant="ghost" onClick={() => navigate("/dashboard/posts")}>
             ← Back
           </Button>
           <div>
