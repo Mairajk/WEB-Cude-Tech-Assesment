@@ -1,0 +1,100 @@
+import { useState, useEffect } from "react";
+import CommentCard from "./CommentCard";
+import CommentForm from "./CommentForm";
+import Spinner from "../common/Spinner";
+import Pagination from "../common/Pagination";
+import commentService from "../../services/commentService";
+
+/**
+ * CommentList Component
+ * Manages fetching, displaying and adding comments for a post
+ * Self-contained — handles its own state and API calls
+ * @param {string} postId - ID of the post to show comments for
+ */
+const CommentList = ({ postId }) => {
+  const [comments, setComments] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [page, setPage] = useState(1);
+
+  /**
+   * Fetch comments when component mounts or page changes
+   */
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        setLoading(true);
+        const response = await commentService.getComments(postId, {
+          page,
+          limit: 10,
+        });
+        setComments(response.data.comments);
+        setPagination(response.data.pagination);
+      } catch (err) {
+        console.error("Failed to fetch comments:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (postId) fetchComments();
+  }, [postId, page]);
+
+  /**
+   * Handle new comment submission
+   * Optimistically prepends new comment to list
+   * @param {object} data - { content }
+   */
+  const handleAddComment = async (data) => {
+    try {
+      setSubmitting(true);
+      const response = await commentService.addComment(postId, data);
+      const newComment = response.data.comment;
+
+      /** Prepend new comment to top of list */
+      setComments((prev) => [newComment, ...prev]);
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="mt-12">
+      <h3 className="text-xl font-bold text-gray-800 mb-6">
+        Comments {pagination && `(${pagination.totalComments})`}
+      </h3>
+
+      {/** Comment form */}
+      <div className="mb-8">
+        <CommentForm onSubmit={handleAddComment} loading={submitting} />
+      </div>
+
+      {/** Comments list */}
+      {loading ? (
+        <div className="py-8">
+          <Spinner size="md" />
+        </div>
+      ) : comments.length === 0 ? (
+        <div className="text-center py-8 text-gray-400 text-sm">
+          No comments yet. Be the first to comment!
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-xl px-6 divide-y divide-gray-100">
+          {comments.map((comment) => (
+            <CommentCard key={comment._id} comment={comment} />
+          ))}
+        </div>
+      )}
+
+      {/** Pagination */}
+      {pagination && (
+        <Pagination pagination={pagination} onPageChange={setPage} />
+      )}
+    </div>
+  );
+};
+
+export default CommentList;
