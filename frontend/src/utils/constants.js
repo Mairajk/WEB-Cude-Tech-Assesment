@@ -1,8 +1,10 @@
 /**
  * Base API URL
- * Points to our Express backend
+ * Uses environment variable in production
+ * Falls back to localhost in development
  */
-export const API_BASE_URL = "http://localhost:5000/api";
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 /**
  * Local storage keys
