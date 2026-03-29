@@ -10,23 +10,13 @@ const Sidebar = () => {
   const { user } = useAuth();
 
   /**
-   * Base nav links available to all authenticated users
+   * Sidebar links
    */
-  const authorLinks = [
+  const links = [
     { to: "/dashboard", label: "Overview", icon: "📊", end: true },
     { to: "/dashboard/my-posts", label: "My Posts", icon: "📝" },
     { to: "/dashboard/create-post", label: "New Post", icon: "✏️" },
   ];
-
-  /**
-   * Extra links only visible to admin users
-   */
-  const adminLinks = [
-    { to: "/dashboard/stats", label: "Statistics", icon: "📈" },
-  ];
-
-  const links =
-    user?.role === "admin" ? [...authorLinks, ...adminLinks] : authorLinks;
 
   return (
     <aside className="w-64 min-h-screen bg-gray-50 border-r border-gray-200 flex flex-col">
