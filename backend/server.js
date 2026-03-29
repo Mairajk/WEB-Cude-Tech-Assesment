@@ -22,6 +22,12 @@ const routes = require("./routes/index");
 
   const app = express();
 
+  console.log(
+    `
+    alllowed FRONT END URL >>>>>>>>>>>>>>>>>>....................`,
+    process.env.FRONTEND_URL,
+  );
+
   /**
    * Core middleware
    * - cors: cross-origin requests from frontend
@@ -30,7 +36,7 @@ const routes = require("./routes/index");
    */
   app.use(
     cors({
-      origin: ["http://localhost:5173", process.env.FRONTEND_URL],
+      origin: "*", // ["http://localhost:5173", process.env.FRONTEND_URL],
       credentials: true,
     }),
   );
