@@ -53,7 +53,11 @@ const MyPostsPage = () => {
    * @param {string} status - New status
    */
   const handleStatusChange = async (id, status) => {
-    await updatePostStatus(id, status);
+    await updatePostStatus(id, status, {
+      page,
+      limit: 10,
+      status: statusFilter || undefined,
+    });
   };
 
   return (

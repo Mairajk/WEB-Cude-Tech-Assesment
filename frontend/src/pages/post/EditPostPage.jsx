@@ -6,11 +6,12 @@ import PostForm from "../../components/post/PostForm";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import Spinner from "../../components/common/Spinner";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import Button from "../../components/common/Button";
 
 /**
  * EditPostPage
  * Dashboard page for editing an existing post
- * Fetches post data and pre-fills PostForm
+ * Uses authenticated API call so drafts are accessible
  */
 const EditPostPage = () => {
   const { id } = useParams();
@@ -20,13 +21,16 @@ const EditPostPage = () => {
   const [fetchLoading, setFetchLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
 
-  /**
-   * Fetch existing post data to pre-fill the form
-   */
   useEffect(() => {
     const fetchPost = async () => {
       try {
         setFetchLoading(true);
+
+        /**
+         * postService.getPostById uses the authenticated api instance
+         * so the Bearer token is sent automatically via axios interceptor
+         * This allows fetching draft posts that belong to the user
+         */
         const response = await postService.getPostById(id);
         setPost(response.data.post);
       } catch (err) {
@@ -39,11 +43,6 @@ const EditPostPage = () => {
     fetchPost();
   }, [id]);
 
-  /**
-   * Handle post update submission
-   * Redirects to my posts on success
-   * @param {object} postData - Updated form data
-   */
   const handleSubmit = async (postData) => {
     const result = await updatePost(id, postData);
     if (result.success) {
@@ -64,7 +63,16 @@ const EditPostPage = () => {
   if (fetchError) {
     return (
       <DashboardLayout>
-        <ErrorMessage message={fetchError} />
+        <div className="max-w-3xl">
+          <ErrorMessage message={fetchError} />
+          <Button
+            variant="secondary"
+            className="mt-4"
+            onClick={() => navigate("/dashboard/my-posts")}
+          >
+            ← Back to My Posts
+          </Button>
+        </div>
       </DashboardLayout>
     );
   }
@@ -72,15 +80,22 @@ const EditPostPage = () => {
   return (
     <DashboardLayout>
       <div className="max-w-3xl">
-        {/** Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Edit Post</h1>
-          <p className="text-gray-500 mt-1">
-            Update your article content and settings
-          </p>
+        {/** Page Header with back button */}
+        <div className="flex items-center gap-4 mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/dashboard/my-posts")}
+          >
+            ← Back
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Edit Post</h1>
+            <p className="text-gray-500 mt-1">
+              Update your article content and settings
+            </p>
+          </div>
         </div>
 
-        {/** Post Form with initial data */}
         <div className="bg-white border border-gray-200 rounded-2xl p-8">
           <PostForm
             initialData={post}

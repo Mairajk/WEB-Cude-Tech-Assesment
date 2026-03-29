@@ -2,21 +2,17 @@ import { useNavigate } from "react-router-dom";
 import usePosts from "../../hooks/usePosts";
 import PostForm from "../../components/post/PostForm";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import Button from "../../components/common/Button";
 
 /**
  * CreatePostPage
  * Dashboard page for creating a new blog post
- * Uses PostForm component with create-specific config
+ * Includes back button for consistent navigation UX
  */
 const CreatePostPage = () => {
-  const { createPost, loading, error, clearError } = usePosts();
+  const { createPost, loading, error } = usePosts();
   const navigate = useNavigate();
 
-  /**
-   * Handle post creation
-   * On success redirects to my posts page
-   * @param {object} postData - Validated form data from PostForm
-   */
   const handleSubmit = async (postData) => {
     const result = await createPost(postData);
     if (result.success) {
@@ -27,10 +23,20 @@ const CreatePostPage = () => {
   return (
     <DashboardLayout>
       <div className="max-w-3xl">
-        {/** Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Create New Post</h1>
-          <p className="text-gray-500 mt-1">Write and publish your article</p>
+        {/** Page Header with back button */}
+        <div className="flex items-center gap-4 mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/dashboard/my-posts")}
+          >
+            ← Back
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Create New Post
+            </h1>
+            <p className="text-gray-500 mt-1">Write and publish your article</p>
+          </div>
         </div>
 
         {/** Post Form */}

@@ -8,19 +8,17 @@ import commentService from "../../services/commentService";
 /**
  * CommentList Component
  * Manages fetching, displaying and adding comments for a post
- * Self-contained — handles its own state and API calls
+ * totalComments tracks live count including newly added comments
  * @param {string} postId - ID of the post to show comments for
  */
 const CommentList = ({ postId }) => {
   const [comments, setComments] = useState([]);
   const [pagination, setPagination] = useState(null);
+  const [totalComments, setTotalComments] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
 
-  /**
-   * Fetch comments when component mounts or page changes
-   */
   useEffect(() => {
     const fetchComments = async () => {
       try {
@@ -31,6 +29,12 @@ const CommentList = ({ postId }) => {
         });
         setComments(response.data.comments);
         setPagination(response.data.pagination);
+
+        /**
+         * Sync total count from pagination metadata
+         * This is the source of truth from the backend
+         */
+        setTotalComments(response.data.pagination.totalComments);
       } catch (err) {
         console.error("Failed to fetch comments:", err);
       } finally {
@@ -43,7 +47,7 @@ const CommentList = ({ postId }) => {
 
   /**
    * Handle new comment submission
-   * Optimistically prepends new comment to list
+   * Optimistically prepends comment and increments count
    * @param {object} data - { content }
    */
   const handleAddComment = async (data) => {
@@ -54,6 +58,12 @@ const CommentList = ({ postId }) => {
 
       /** Prepend new comment to top of list */
       setComments((prev) => [newComment, ...prev]);
+
+      /**
+       * Increment count immediately without refetching
+       * Keeps UI in sync without extra API call
+       */
+      setTotalComments((prev) => prev + 1);
     } catch (err) {
       console.error("Failed to add comment:", err);
     } finally {
@@ -64,15 +74,13 @@ const CommentList = ({ postId }) => {
   return (
     <div className="mt-12">
       <h3 className="text-xl font-bold text-gray-800 mb-6">
-        Comments {pagination && `(${pagination.totalComments})`}
+        Comments ({totalComments})
       </h3>
 
-      {/** Comment form */}
       <div className="mb-8">
         <CommentForm onSubmit={handleAddComment} loading={submitting} />
       </div>
 
-      {/** Comments list */}
       {loading ? (
         <div className="py-8">
           <Spinner size="md" />
@@ -89,7 +97,6 @@ const CommentList = ({ postId }) => {
         </div>
       )}
 
-      {/** Pagination */}
       {pagination && (
         <Pagination pagination={pagination} onPageChange={setPage} />
       )}

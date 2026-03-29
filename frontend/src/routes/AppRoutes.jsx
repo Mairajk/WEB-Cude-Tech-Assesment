@@ -115,18 +115,6 @@ const AppRoutes = () => {
           }
         />
 
-        {/** Admin Only Routes */}
-        <Route
-          path="/dashboard/stats"
-          element={
-            <ErrorBoundary>
-              <ProtectedRoute requiredRole="admin">
-                <DashboardPage />
-              </ProtectedRoute>
-            </ErrorBoundary>
-          }
-        />
-
         {/** 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>

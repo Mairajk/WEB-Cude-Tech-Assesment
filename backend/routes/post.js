@@ -61,7 +61,7 @@ router.put(
   authorizeRoles("admin", "author"),
   postRules,
   validate,
-  createPost,
+  updatePost,
 );
 
 /**

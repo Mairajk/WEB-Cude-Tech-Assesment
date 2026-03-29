@@ -149,30 +149,33 @@ export const PostProvider = ({ children }) => {
 
   /**
    * Update post status (draft/published)
+   * Refetches current filtered list after update
+   * This ensures filtered views stay accurate
+   * e.g. if on "published" filter and user unpublishes
+   * the post correctly disappears from the list
    * @param {string} id - Post ID
    * @param {string} status - New status
+   * @param {object} currentParams - Current filter params to refetch with
    */
   const updatePostStatus = useCallback(
-    async (id, status) => {
-      const originalPosts = myPosts;
-
-      /** Optimistically update status */
-      setMyPosts((prev) =>
-        prev.map((post) => (post._id === id ? { ...post, status } : post)),
-      );
-
+    async (id, status, currentParams = {}) => {
       try {
         await postService.updatePostStatus(id, status);
+
+        /**
+         * Refetch list with current filter params
+         * Keeps filtered views accurate after status change
+         */
+        await fetchMyPosts(currentParams);
         return { success: true };
       } catch (err) {
-        setMyPosts(originalPosts);
         const message =
           err.response?.data?.message || "Failed to update status";
         setError(message);
         return { success: false, message };
       }
     },
-    [myPosts],
+    [fetchMyPosts],
   );
 
   /** Clear post errors */
